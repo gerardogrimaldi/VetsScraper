@@ -1,0 +1,12 @@
+{
+  "name": "chat-example",
+  "version": "0.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "async": "~0.2.8",
+    "express": "~3.2.4",
+    "cheerio": "~0.13.1",
+    "request": "~2.33.0",
+    "mongoose": "~3.8.6"
+  }
+}
