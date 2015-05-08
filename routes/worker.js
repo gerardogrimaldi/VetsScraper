@@ -1,86 +1,63 @@
 //http://blog.miguelgrinberg.com/post/easy-web-scraping-with-nodejs
-var aviso = require('../models/aviso').aviso; 
+var vet = require('../models/vet.server.model').vet;
 var request = require('request');
 var cheerio = require('cheerio');
 
-var url = 'http://www.paginasamarillas.com.ar/b/veterinarias/';
+var urlHost = 'http://www.paginasamarillas.com.ar/b/veterinarias/';
 
 exports.start = function(req, res) {
-  /*var options = {
-    url: 'http://www.paginasamarillas.com.ar/b/veterinarias/',
-    headers: {
-      'User-Agent': 'request'
-    }
-  };
-
-  function callback(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var info = JSON.parse(body);
-      console.log(info.stargazers_count + " Stars");
-      console.log(info.forks_count + " Forks");
-    }
-  }
-
-  request(options, callback);*/
-  request({uri: 'http://www.paginasamarillas.com.ar/b/veterinarias'},
+  request({uri: urlHost, headers: {'User-Agent': 'request'}},
     function(err, response, body){
     if (err && resp.statusCode === 200) {
       console.log(err); //throw err;
     }
     $ = cheerio.load(body);
-    var results = parseInt($('.m-header--count').text()) + 1;
-    console.log(results);
-    var pages = $('.paginador.box a:nth-last-child(2)').text().trim();
-    console.log(pages);
+    var results = parseInt($('.m-header--count').text()) + 1 ;
+    var pages = parseInt(results / 25) + 1;
+
     scraper(pages);
   });
 };
 
 function scraper(pages) {
-  for (var i = 0; i < pages; i++) {
-    var url = "http://www.bumeran.com.ar/empleos-publicacion-hoy-pagina-" + (i + 1) + ".html";
-    request(url, (function (i) {
-      return function (err, resp, body) {
-        if (err && resp.statusCode == 200) {
+  for (var i = 1; i < pages + 1; i++) {
+    var url = urlHost + 'p-' + i;
+    request({uri: url, headers: {'User-Agent': 'request'}},
+      function (err, resp, body) {
+        if (err && resp && resp.statusCode === 200) {
           console.log(err); //throw err;
         }
         $ = cheerio.load(body);
-        $(".aviso_box.aviso_listado").each(function (index, tr) {
-          console.log("Scrapping..." + $(this).attr("href"));
-          scraperLinks($(this).attr("href"));
-        });
-      };
-    })(i));
+        var name=         $('.m-results-business--name').text();
+        var url=          $('.m-results-business--online');
+        var address=      $('.m-results-business--address');
+        var details=      $('.l-plain.m-results-business--services');
+        var detailsFull=  $('.m-results-business-expanded-section');
+        var site=         $('.m-results-business--online');
+        var location=     $('.m-results-business-map');
+        /*var location = $('.aviso-resumen-datos tr td').last().text().trim(); // $('#.aviso-resumen-datos tr').last().find( "a" ).text();
+         var detail = $("#contenido_aviso p:nth-child(2)").text();//$("#contenido_aviso p").first().text();
+         var title = $(".box h2").first().text().trim();
+         var date = $(".aviso-resumen-datos tbody tr td").first().text().trim();*/
+        console.log("Saving..." + url);
+        grabarAviso(name, url, address, details, detailsFull, site, location);
+      }
+    );
   }
 }
-    
-function scraperLinks(link) {
-  var url = "http://www.bumeran.com.ar" + link;
-  request(url, function (err, resp, body) {
-    if (err && resp.statusCode == 200) {
-      console.log(err);
-    } //throw err;
-    $ = cheerio.load(body);            //console.log(body);
-    var location = $('.aviso-resumen-datos tr td').last().text().trim(); // $('#.aviso-resumen-datos tr').last().find( "a" ).text();
-    var detail = $("#contenido_aviso p:nth-child(2)").text();//$("#contenido_aviso p").first().text();
-    var title = $(".box h2").first().text().trim();
-    var date = $(".aviso-resumen-datos tbody tr td").first().text().trim();
-    console.log("Saving..." + url);
-    grabarAviso(url, location, detail, title, date);
-  });
-}
 
-function grabarAviso(url, location, detail, title, date) {
-  aviso.findOne({url: {$regex: new RegExp(url, "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
+function grabarAviso(name, url, address, details, detailsFull, site, location) {
+  vet.findOne({url: {$regex: new RegExp(url, "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
     if (!err && !doc) {
-      var newAviso = new aviso();
-      newAviso.url = url;
-      newAviso.site = 'Bumeran';
-      newAviso.location = location;
-      newAviso.date = date;
-      newAviso.title = title;
-      newAviso.detail = detail;
-      newAviso.save(function (err) {
+      var newVet = new vet();
+      newVet.name = name;
+      newVet.url = url;
+      newVet.address = address;
+      newVet.details = details;
+      newVet.detailsFull = detailsFull;
+      newVet.site = site;
+      newVet.location = location;
+      newVet.save(function (err) {
         if (!err) {
           console.log("Saved " + url);
           //res.json(201, {message: "Aviso created with name: " + newAviso.name });    
@@ -95,7 +72,7 @@ function grabarAviso(url, location, detail, title, date) {
       //res.json(500, { message: err});
     }
   });
-};
+}
 
 
 exports.jobs = function(req, res) {

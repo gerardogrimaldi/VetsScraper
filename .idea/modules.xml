@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$USER_HOME$/GitHub/VetsScraper/.idea/JobScraper.iml" filepath="$USER_HOME$/GitHub/VetsScraper/.idea/JobScraper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/VetsScraper.iml" filepath="$PROJECT_DIR$/.idea/VetsScraper.iml" />
     </modules>
   </component>
 </project>
