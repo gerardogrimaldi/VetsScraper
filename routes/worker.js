@@ -28,19 +28,18 @@ function scraper(pages) {
           console.log(err); //throw err;
         }
         $ = cheerio.load(body);
-        var name=         $('.m-results-business--name').text();
-        var url=          $('.m-results-business--online');
-        var address=      $('.m-results-business--address');
-        var details=      $('.l-plain.m-results-business--services');
-        var detailsFull=  $('.m-results-business-expanded-section');
-        var site=         $('.m-results-business--online');
-        var location=     $('.m-results-business-map');
-        /*var location = $('.aviso-resumen-datos tr td').last().text().trim(); // $('#.aviso-resumen-datos tr').last().find( "a" ).text();
-         var detail = $("#contenido_aviso p:nth-child(2)").text();//$("#contenido_aviso p").first().text();
-         var title = $(".box h2").first().text().trim();
-         var date = $(".aviso-resumen-datos tbody tr td").first().text().trim();*/
+        for (var l = 1; l < 25; l++) {
+          var name     = $($('.m-results-business--name a')[l]).text();
+          var url      = $($('.m-results-business--online a')[l]).text();
+          var address  = $($('.m-results-business--address a')[l]).text();
+          var details  = $($('.l-plain.m-results-business--services')[l]).text();
+          //var detailsFull=  $($('.m-results-business-expanded-section a')[0]).text();
+          var site     = $($('.m-results-business--online a')[l]).text();
+          var location = $($('.m-results-business-map')[l]);
+        }
         console.log("Saving..." + url);
-        grabarAviso(name, url, address, details, detailsFull, site, location);
+        //detailsFull,
+        grabarAviso(name, url, address, details, site, location);
       }
     );
   }
