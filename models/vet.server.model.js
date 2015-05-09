@@ -41,4 +41,5 @@ var VetSchema = new Schema({
   }
 });
 
-mongoose.model('Vet', VetSchema);
+
+module.exports = mongoose.model('Vet', VetSchema);

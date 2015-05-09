@@ -1,5 +1,5 @@
 //http://blog.miguelgrinberg.com/post/easy-web-scraping-with-nodejs
-var vet = require('../models/vet.server.model').vet;
+var vet = require('../models/vet.server.model');
 var request = require('request');
 var cheerio = require('cheerio');
 
@@ -29,23 +29,22 @@ function scraper(pages) {
         }
         $ = cheerio.load(body);
         for (var l = 1; l < 25; l++) {
-          var name     = $($('.m-results-business--name a')[l]).text();
-          var url      = $($('.m-results-business--online a')[l]).text();
-          var address  = $($('.m-results-business--address a')[l]).text();
-          var details  = $($('.l-plain.m-results-business--services')[l]).text();
-          //var detailsFull=  $($('.m-results-business-expanded-section a')[0]).text();
-          var site     = $($('.m-results-business--online a')[l]).text();
+          var name = $($('.m-results-business--name a')[l]).text();
+          var url = $($('.m-results-business--online a')[l]).text();
+          var address = $($('.m-results-business--address a')[l]).text();
+          var details = $($('.l-plain.m-results-business--services')[l]).text();
+          var site = $($('.m-results-business--online a')[l]).text();
           var location = $($('.m-results-business-map')[l]);
+          console.log("Saving..." + name);
+          //detailsFull,
+          grabarAviso(name, url, address, details, site, location);
         }
-        console.log("Saving..." + url);
-        //detailsFull,
-        grabarAviso(name, url, address, details, site, location);
       }
     );
   }
 }
 
-function grabarAviso(name, url, address, details, detailsFull, site, location) {
+function grabarAviso(name, url, address, details, site, location) {
   vet.findOne({url: {$regex: new RegExp(url, "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
     if (!err && !doc) {
       var newVet = new vet();
@@ -72,27 +71,3 @@ function grabarAviso(name, url, address, details, detailsFull, site, location) {
     }
   });
 }
-
-
-exports.jobs = function(req, res) {
-  var searchterm = req.body.searchterm;
-  if (searchterm == null) {
-    aviso.find({}, function (err, docs) {
-      if (!err) {
-        res.json(200, {jobs: docs});
-      } else {
-        res.json(500, {message: err});
-      }
-    });
-  } else {
-    aviso.findONe({name: {$regex: new RegExp(searchterm, "i")}}, function (err, docs) {  // Using RegEx - search is case insensitive
-      if (!err && !docs) {
-        if (!err) {
-          res.json(200, {jobs: docs});
-        } else {
-          res.json(500, {message: err});
-        }
-      }
-    });
-  }
-};
