@@ -29,10 +29,10 @@ function scraper(pages) {
         }
         $ = cheerio.load(body);
         for (var l = 1; l < 25; l++) {
-          var name = $($('.m-results-business--name a')[l]).text();
-          var url = $($('.m-results-business--online a')[l]).text();
-          var address = $($('.m-results-business--address a')[l]).text();
-          var details = $($('.l-plain.m-results-business--services')[l]).text();
+          var name = $($('.m-results-business--name a')[l]).text().trim();
+          var url = $($('.m-results-business--online a')[l]).text().trim();
+          var address = $($('.m-results-business--address')[l]).text().trim();
+          var details = $($('.l-plain.m-results-business--services')[l]).text().trim();
           var site = $($('.m-results-business--online a')[l]).text();
           var location = $($('.m-results-business-map')[l]);
           console.log("Saving..." + name);
@@ -52,7 +52,7 @@ function grabarAviso(name, url, address, details, site, location) {
       newVet.url = url;
       newVet.address = address;
       newVet.details = details;
-      newVet.detailsFull = detailsFull;
+      //newVet.detailsFull = detailsFull;
       newVet.site = site;
       newVet.location = location;
       newVet.save(function (err) {
