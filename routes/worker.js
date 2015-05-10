@@ -8,9 +8,9 @@ var urlHost = 'http://www.paginasamarillas.com.ar/b/veterinarias/';
 exports.start = function(req, res) {
   request({uri: urlHost, headers: {'User-Agent': 'request'}},
     function(err, response, body){
-    if (err && resp.statusCode === 200) {
-      console.log(err); //throw err;
-    }
+      if (err && resp.statusCode === 200) {
+        console.log(err); //throw err;
+      }
     $ = cheerio.load(body);
     var results = parseInt($('.m-header--count').text()) + 1 ;
     var pages = parseInt(results / 25) + 1;
@@ -28,36 +28,42 @@ function scraper(pages) {
           console.log(err); //throw err;
         }
         $ = cheerio.load(body);
-        for (var l = 1; l < 25; l++) {
-          var name = $($('.m-results-business--name a')[l]).text().trim();
-          var url = $($('.m-results-business--online a')[l]).text().trim();
-          var address = $($('.m-results-business--address')[l]).text().trim();
-          var details = $($('.l-plain.m-results-business--services')[l]).text().trim();
-          var site = $($('.m-results-business--online a')[l]).text();
-          var location = $($('.m-results-business-map')[l]);
-          console.log("Saving..." + name);
-          //detailsFull,
-          grabarAviso(name, url, address, details, site, location);
+        for (var l = 0; l < 25; l++) {
+          var name     = $($('.m-results-business--name a')[l]).text().replace(/(\r\n|\n|\r|\t)/gm,'').trim();
+          var url      = $($('.m-results-business--online a')[l]).text().replace(/(\r\n|\n|\r|\t)/gm,'').trim();
+          var address  = $($('.m-results-business--address')[l]).text().replace(/(\r\n|\n|\r|\t)/gm,' ');
+          var details  = $($('.l-plain.m-results-business--services li')[l]).text().trim();
+          var coords   = {};
+          if($($('.m-results-business--map-link')[l]).attr('onclick')) {
+            coords.longitude = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[0];
+            coords.latitude  = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[1];
+          }
+          grabarAviso(name, url, address, details, coords);
         }
       }
     );
   }
 }
 
-function grabarAviso(name, url, address, details, site, location) {
-  vet.findOne({url: {$regex: new RegExp(url, "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
+function grabarAviso(name, url, address, details, coords) {
+  vet.findOne({name: {$regex: new RegExp(name.replace(/\+/g, ''), "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
     if (!err && !doc) {
       var newVet = new vet();
       newVet.name = name;
       newVet.url = url;
       newVet.address = address;
       newVet.details = details;
-      //newVet.detailsFull = detailsFull;
-      newVet.site = site;
-      newVet.location = location;
+      newVet.coords = coords;
       newVet.save(function (err) {
         if (!err) {
           console.log("Saved " + url);
+
+          console.log(name);
+          console.log(url);
+          console.log(address);
+          console.log(details);
+          console.log(coords);
+
           //res.json(201, {message: "Aviso created with name: " + newAviso.name });    
         } else {
           console.log("Error... " + err);

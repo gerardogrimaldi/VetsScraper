@@ -1,10 +1,8 @@
-'use strict';
-
 /**
  * Module dependencies.
  */
 var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+  Schema = mongoose.Schema;
 
 /**
  * Vet Schema
@@ -13,20 +11,37 @@ var VetSchema = new Schema({
   name: {
     type: String,
     default: '',
-    required: 'Please fill Vet name',
+    //required: 'Por favor, ingrese el nombre',
     trim: true
   },
-  url: {
-    type: String, required: true, trim: true
+  description: {
+    type: String,
+    default: '',
+    //required: 'Por favor, ingrese el la descripcion',
+    trim: true
   },
-  details: {
-    type: String
+  email: {
+    type: String,
+    default: '',
+    //required: 'Por favor, ingrese el email',
+    trim: true
   },
-  site: {
-    type: String
+  tel: {
+    type: Schema.Types.Mixed
   },
-  location: {
-    type: String
+  servicesList: {
+    type: Schema.Types.Mixed
+  },
+  schedule: {
+    type: Schema.Types.Mixed
+  },
+  address: {
+    type: String,
+    default: ''
+    //required: 'Por favor, ingrese la dirección'
+  },
+  coords: {
+    type: Schema.Types.Mixed
   },
   created: {
     type: Date,
@@ -36,10 +51,10 @@ var VetSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   },
-  date_created: {
-    type: Date, required: true, default: Date.now
+  url: {
+    type: String,
+    default: ''
   }
 });
-
 
 module.exports = mongoose.model('Vet', VetSchema);
