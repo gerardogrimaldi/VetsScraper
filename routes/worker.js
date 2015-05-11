@@ -31,21 +31,23 @@ function scraper(pages) {
         for (var l = 0; l < 25; l++) {
           var name     = $($('.m-results-business--name a')[l]).text().replace(/(\r\n|\n|\r|\t)/gm,'').trim();
           var url      = $($('.m-results-business--online a')[l]).text().replace(/(\r\n|\n|\r|\t)/gm,'').trim();
-          var address  = $($('.m-results-business--address')[l]).text().replace(/(\r\n|\n|\r|\t)/gm,' ');
+          var address  = $($($('.m-results-business--address')[l]).children('span').eq(0)).text().trim() + ', ' + $($($('.m-results-business--address')[l]).children('span').eq(1)).text().trim();
           var details  = $($('.l-plain.m-results-business--services li')[l]).text().trim();
           var coords   = {};
           if($($('.m-results-business--map-link')[l]).attr('onclick')) {
             coords.longitude = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[0];
             coords.latitude  = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[1];
           }
-          grabarAviso(name, url, address, details, coords);
+          if (name && address) {
+            grabarVet(name, url, address, details, coords);
+          }
         }
       }
     );
   }
 }
 
-function grabarAviso(name, url, address, details, coords) {
+function grabarVet(name, url, address, details, coords) {
   vet.findOne({name: {$regex: new RegExp(name.replace(/\+/g, ''), "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
     if (!err && !doc) {
       var newVet = new vet();
@@ -57,7 +59,6 @@ function grabarAviso(name, url, address, details, coords) {
       newVet.save(function (err) {
         if (!err) {
           console.log("Saved " + url);
-
           console.log(name);
           console.log(url);
           console.log(address);
