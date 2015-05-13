@@ -35,8 +35,8 @@ function scraper(pages) {
           var details  = $($('.l-plain.m-results-business--services li')[l]).text().trim();
           var coords   = {};
           if($($('.m-results-business--map-link')[l]).attr('onclick')) {
-            coords.longitude = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[0];
-            coords.latitude  = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[1];
+            coords.latitude  = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[0];
+            coords.longitude = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[1];
           }
           if (name && address) {
             grabarVet(name, url, address, details, coords);
