@@ -41,7 +41,8 @@ var VetSchema = new Schema({
     //required: 'Por favor, ingrese la dirección'
   },
   coords: {
-    type: Schema.Types.Mixed
+    type: [Number],
+    index: '2d'
   },
   created: {
     type: Date,

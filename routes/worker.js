@@ -33,10 +33,11 @@ function scraper(pages) {
           var url      = $($('.m-results-business--online a')[l]).text().replace(/(\r\n|\n|\r|\t)/gm,'').trim();
           var address  = $($($('.m-results-business--address')[l]).children('span').eq(0)).text().trim() + ', ' + $($($('.m-results-business--address')[l]).children('span').eq(1)).text().trim();
           var details  = $($('.l-plain.m-results-business--services li')[l]).text().trim();
-          var coords   = {};
+          var coords = [];
           if($($('.m-results-business--map-link')[l]).attr('onclick')) {
-            coords.latitude  = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[0];
-            coords.longitude = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[1];
+            var latitude  = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[0];
+            var longitude = $($('.m-results-business--map-link')[l]).attr('onclick').split('|')[2].split('&')[0].split(',')[1];
+            coords    = [latitude,longitude ];
           }
           if (name && address) {
             grabarVet(name, url, address, details, coords);
