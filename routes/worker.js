@@ -1,19 +1,68 @@
+/**
+ * Module Dependencies
+ */
+
 //http://blog.miguelgrinberg.com/post/easy-web-scraping-with-nodejs
 var vet = require('../models/vet.server.model');
-var request = require('request');
-var cheerio = require('cheerio');
+/*var request = require('request');
+var cheerio = require('cheerio');*/
+
+var xray = require('xray');
 
 var urlHost = 'http://www.paginasamarillas.com.ar/b/veterinarias/';
 
-exports.start = function(req, res) {
+
+exports.start = function() {
+  xray('http://www.paginasamarillas.com.ar/b/veterinarias/ciudad-de-buenos-aires/')
+      .select([{
+        $root: '.m-results-business',
+        title: '.m-results-business--name a',
+        address: '.m-results-business--address',
+        url: '.m-results-business--online a',
+        desc: '.m-results-business--services',
+        services: '.m-services',
+        openTime: '.m-opening-hours',
+        coords: '.m-results-business--map-link[onclick]',
+        tel: '.m-bip-otras-direcciones--telefonos p',
+        img: '.media-container-img[src]'
+      }])
+      .paginate('.m-results-pagination li > a:last-child[href]')
+      .limit(1)
+      .run(function(err, json) {
+        if (err) throw err;
+        json.forEach( function(vet) {
+          vet.title = vet.title.replace(/(\r\n|\n|\r|\t)/gm,'').trim();
+          vet.address = vet.address.replace(/(\r\n|\n|\r|\t)/gm,'').trim();
+          vet.desc = vet.desc.replace(/(\r\n|\n|\r|\t)/gm,'').trim();
+          if (vet.services) {
+            vet.services = vet.services.replace(/(\r\n|\n|\r|\t)/gm,'').trim();
+          }
+          vet.openTime = vet.openTime.replace(/(\r\n|\n|\r|\t)/gm,'').trim();
+          if(vet.coords) {
+            var lat = vet.coords.split('|')[2].split('&')[0].split(',')[0];
+            var long = vet.coords.split('|')[2].split('&')[0].split(',')[1];
+            vet.coords = {};
+            vet.coords.latitude = lat;
+            vet.coords.longitude = long;
+          }
+          if (name && address) {
+            grabarVet(vet.title, vet.url, vet.address, vet.desc, vet.coords, vet.openTime, vet.tel, vet.services);
+          }
+          //console.log(JSON.stringify(vet, null, 2));
+        });
+        //console.log(JSON.stringify(json, null, 2));
+      })
+};
+
+/*exports.start = function(req, res) {
   request({uri: urlHost, headers: {'User-Agent': 'request'}},
     function(err, response, body){
       if (err && resp.statusCode === 200) {
         console.log(err); //throw err;
       }
     $ = cheerio.load(body);
-    var results = parseInt($('.m-header--count').text()) + 1 ;
-    var pages = parseInt(results / 25) + 1;
+    var results = parseInt($('.m-header--count').text()) + 1;
+    var pages   = parseInt(results / 25) + 1;
 
     scraper(pages);
   });
@@ -45,9 +94,9 @@ function scraper(pages) {
       }
     );
   }
-}
+}*/
 
-function grabarVet(name, url, address, details, coords) {
+function grabarVet(name, url, address, details, coords, schedule, tel, servicesList) {
   vet.findOne({name: {$regex: new RegExp(name.replace(/\+/g, ''), "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
     if (!err && !doc) {
       var newVet = new vet();
@@ -56,6 +105,9 @@ function grabarVet(name, url, address, details, coords) {
       newVet.address = address;
       newVet.details = details;
       newVet.coords = coords;
+      newVet.schedule = schedule;
+      newVet.tel = tel;
+      newVet.servicesList = servicesList;
       newVet.save(function (err) {
         if (!err) {
           console.log("Saved " + url);
@@ -64,15 +116,14 @@ function grabarVet(name, url, address, details, coords) {
           console.log(address);
           console.log(details);
           console.log(coords);
-
-          //res.json(201, {message: "Aviso created with name: " + newAviso.name });    
+          //res.json(201, {message: "Aviso created with name: " + newAviso.name });
         } else {
           console.log("Error... " + err);
           //res.json(500, {message: "Could not create User. Error: " + err});
         }
       });
     } else if (!err) {
-      //res.json(403, { message: "Aviso with that name already exists, please update instead of create or create a new User with a different name."}); 
+      //res.json(403, { message: "Aviso with that name already exists, please update instead of create or create a new User with a different name."});
     } else {
       //res.json(500, { message: err});
     }
