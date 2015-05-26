@@ -5,7 +5,6 @@ var xray = require('x-ray');
 
 var urlHost = 'http://www.paginasamarillas.com.ar/b/veterinarias/ciudad-de-buenos-aires/';
 
-
 exports.start = function() {
   xray(urlHost)
     .select([{
@@ -22,16 +21,18 @@ exports.start = function() {
       page: '.m-results-pagination li.last > a[href]'
     }])
     .paginate('.m-results-pagination li.last > a[href]')
-    .limit(23)
+    .limit(1)
     .run(function (err, json) {
+
       if (err) throw err;
+
       json.forEach(function (vet) {
         var error = false;
         if (vet.name) {
           vet.name = vet.name.replace(/(\r\n|\n|\r|\t)/gm, '').trim();
         }
         if (vet.address) {
-          vet.address = vet.address.trim();
+          vet.address = vet.address.split(',')[0].trim() + ', ' + vet.address.split(',')[1].trim();
         }
         if (vet.desc) {
           vet.desc = vet.desc.replace(/(\r\n|\n|\r|\t)/gm, '').trim();
@@ -47,13 +48,14 @@ exports.start = function() {
           var long = vet.coords.split('|')[2].split('&')[0].split(',')[1];
           vet.coords = [lat, long];
         }
-
         grabarVet(vet);
+
       });
     });
 };
 
 function grabarVet(vetObj) {
+
   vet.findOne({name: {$regex: new RegExp(vetObj.name.replace(/\+/g, ''), "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
     if (!err && !doc) {
       var newVet = new vet();
@@ -72,10 +74,15 @@ function grabarVet(vetObj) {
           console.log("Error... " + err);
         }
       });
+
     } else if (!err) {
+
       console.log('Name exist');
+
     } else {
+
       console.log(err);
+
     }
   });
 }
