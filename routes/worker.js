@@ -3,7 +3,7 @@
 var vet = require('../models/vet.server.model');
 var xray = require('x-ray');
 
-var urlHost = 'http://www.paginasamarillas.com.ar/b/veterinarias/ciudad-de-buenos-aires/';
+var urlHost = 'http://www.paginasamarillas.com.ar/b/veterinarias';
 
 exports.start = function() {
   xray(urlHost)
@@ -21,7 +21,8 @@ exports.start = function() {
       page: '.m-results-pagination li.last > a[href]'
     }])
     .paginate('.m-results-pagination li.last > a[href]')
-    .limit(1)
+    .limit(191)
+
     .run(function (err, json) {
 
       if (err) throw err;
@@ -41,7 +42,7 @@ exports.start = function() {
           vet.services = vet.services.replace(/(\r\n|\n|\r|\t)/gm, '').trim();
         }
         if (vet.openTime) {
-          vet.openTime = vet.openTime.replace(/(\r\n|\n|\r|\t)/gm, '').trim();
+          vet.openTime = vet.openTime.replace(/(\r\n|\n|\r|\t)/gm, ' ');
         }
         if (vet.coords) {
           var lat = vet.coords.split('|')[2].split('&')[0].split(',')[0];
@@ -64,9 +65,9 @@ function grabarVet(vetObj) {
       newVet.address = vetObj.address;
       newVet.details = vetObj.desc;
       newVet.coords = vetObj.coords;
-      newVet.schedule = vetObj.schedule;
+      newVet.schedule = vetObj.openTime;
       newVet.tel = vetObj.tel;
-      newVet.servicesList = vetObj.servicesList;
+      newVet.servicesList = vetObj.services;
       newVet.save(function (err) {
         if (!err) {
           console.log("Saved " + vetObj.name);
