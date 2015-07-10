@@ -55,6 +55,17 @@ exports.start = function() {
     });
 };
 
+function slugify(text) {
+
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')        // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')   // Remove all non-word chars
+    .replace(/\-\-+/g, '-')      // Replace multiple - with single -
+    .replace(/^-+/, '')          // Trim - from start of text
+    .replace(/-+$/, '');         // Trim - from end of text
+
+};
+
 function grabarVet(vetObj) {
 
   vet.findOne({name: {$regex: new RegExp(vetObj.name.replace(/\+/g, ''), "i")}}, function (err, doc) {  // Using RegEx - search is case insensitive
@@ -68,12 +79,14 @@ function grabarVet(vetObj) {
       newVet.schedule = vetObj.openTime;
       newVet.tel = vetObj.tel;
       newVet.servicesList = vetObj.services;
+      newVet.slug = slugify(vetObj.name);
       newVet.save(function (err) {
         if (!err) {
           console.log("Saved " + vetObj.name);
         } else {
           console.log("Error... " + err);
         }
+
       });
 
     } else if (!err) {

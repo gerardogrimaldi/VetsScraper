@@ -55,6 +55,10 @@ var VetSchema = new Schema({
   url: {
     type: String,
     default: ''
+  },
+  slug: {
+    type: String,
+    default: ''
   }
 });
 
